@@ -11,14 +11,21 @@ class Contenedor{
         return JSON.parse(data);
     }
 
-    //TODO: falta arreglar que esto lea los datos anteriores y forme un nuevo json sino rompe
     async writeFile(obj){
-        return await fs.promises.appendFile(this.filename,`${JSON.stringify(obj)},\n`,(err) => {if (err) console.log(err)});
+        return await fs.promises.writeFile(this.filename,JSON.stringify(obj,null,'\t'));
     }
-
-    save(obj){
+    
+    //TODO: falta arreglar que esto lea los datos anteriores y forme un nuevo json sino rompe
+    async save(obj){
         obj.id = uuidv4();
-        this.writeFile(obj);
+        const dataFile = await this.getAll();
+        const data = dataFile.push({
+            nombre: obj.nombre,
+            apellido: obj.apellido,
+            edad: obj.edad,
+            id: obj.id
+        });
+        this.writeFile(data);
         return obj.id;
     }
 
@@ -72,13 +79,13 @@ class Contenedor{
 const cont = new Contenedor('file');
 
 //DATA TEST
-// const data = {
-//     nombre: 'pedro',
-//     apellido: 'gonzalez',
-//     edad: 45
-// }
+const data = {
+    nombre: 'pedro',
+    apellido: 'gonzalez',
+    edad: 45
+}
 //TEST SAVE
-// console.log(cont.save(data));
+console.log(cont.save(data));
 
 //TEST GETBYID
 // cont.getById('3b5915e6-5c9a-4c3b-a19e-466353c51bd5').then((data) => console.log(data));
