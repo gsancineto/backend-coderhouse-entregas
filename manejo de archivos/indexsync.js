@@ -6,8 +6,8 @@ class Contenedor{
         this.filename = `./${filename}.json`;
     }
 
-    async readFile(){
-        const data = await fs.promises.readFile(this.filename,'utf-8');
+    readFile(){
+        let data = fs.readFileSync(this.filename,'utf-8');
         if(data.length > 0)
         {
             return JSON.parse(data);
@@ -16,65 +16,62 @@ class Contenedor{
         return [];
     }
 
-    async writeFile(obj){
-        return await fs.promises.writeFile(this.filename,JSON.stringify(obj,null,'\t'));
+    writeFile(obj){
+        return fs.writeFileSync(this.filename,JSON.stringify(obj,null,'\t'));
     }
     
     fileExists(){
         return fs.existsSync(this.filename);
     }
 
-    async save(obj){
+    //TODO: falta arreglar que esto lea los datos anteriores y forme un nuevo json sino rompe
+    save(obj){
         obj.id = uuidv4();
-        const data = await this.getAll();
+        const data = this.getAll();
         data.push(obj);
         this.writeFile(data);
-        return await obj.id;
+        return obj.id;
     }
 
-    async getById(id){
-        const data =  await this.readFile();
-        return await data.filter(x=> x.id === id);
+    //TODO: falta filtrar por id
+    getById(id){
+        const data =  this.readFile();
+        return data.filter(x=> x.id === id);
     }
 
     
-    async getAll(){
+    getAll(){
         let data = [];
         if(this.fileExists()){
-            data = await this.readFile();
+            data = this.readFile();
         }
         return data;
     }
 
-    async deleteById(id){
-        const data = await this.getAll();
+    deleteById(id){
+        const data = this.getAll();
         data.splice(data.findIndex(x=> x.id === id),1);
         this.writeFile(data);
     }
 
-    async deleteAll(){
-        await this.writeFile([]);
+    deleteAll(){
+        this.writeFile([]);
     }
 }
 
-const cont = new Contenedor('file');
+const cont = new Contenedor('filesync');
 
 //DATA TEST
 const data = {
-    nombre: 'pedro',
-    apellido: 'gonzales',
-    edad: 32
+    nombre: 'juan',
+    apellido: 'perez',
+    edad: 25
 }
-
-// cont.readFile().then(res => console.log(res));
-// cont.writeFile(data).then(res=> console.log(res));
-
 //TEST SAVE
 // console.log(cont.save(data));
-// cont.save(data).then(res=> console.log(res))
 
 //TEST GETBYID
-// cont.getById('37f015e7-16c7-441f-9698-0b7940fcc8b0').then((data) => console.log(data));
+// cont.getById('3b5915e6-5c9a-4c3b-a19e-466353c51bd5').then((data) => console.log(data));
 // console.log(cont.getById('cfd99073-2d55-44cd-addb-93fb69b1714c'));
 
 //TEST GETALL
@@ -83,7 +80,6 @@ const data = {
 
 //TEST DELETEBYID
 // console.log(cont.deleteById('da98876b-5d4c-4d0f-b172-c34f851a0f3a'));
-// cont.deleteById('37f015e7-16c7-441f-9698-0b7940fcc8b0')
 
 //TEST DELETEALL
 cont.deleteAll();
